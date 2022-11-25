@@ -45,7 +45,7 @@ struct StateScript //0x5C
 	//probably the StringIds are aligned to 8 bytes
 	StringId				m_stateScriptId;		///< <c>0x00</c>: StringId of the script name eg SID("ss-mad-volcano-ascent-ruins-combat")
 	uint32_t				unk;					///< <c>0x04</c>: always 0 ?
-	SsDeclarationList*		m_pSsDeclList;			///< <c>0x08</c>: ptr to a StringId
+	SsDeclarationList*		m_pSsDeclList;			///< <c>0x08</c>: ptr to the declaration list
 	StringId				m_initialStateId;		///< <c>0x10</c>: StringId of the name of the initial state
 	uint32_t				unk1;					///< <c>0x14</c>: always 0 ?
 	SsOptions*				m_pSsOptions;			///< <c>0x18</c>: ptr to the SsOptions
