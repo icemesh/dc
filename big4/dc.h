@@ -35,8 +35,8 @@ struct DC_Header
 
 struct Entry //0x10
 {
-	StringId				m_scriptSid;			///< <c>0x00</c>: StringId of the script name
-	StringId				m_scriptTypeSid;		///< <c>0x04</c>: StringId of the script type
+	StringId				m_scriptId;				///< <c>0x00</c>: StringId of the script name
+	StringId				m_typeId;				///< <c>0x04</c>: StringId of the script type
 	void*					m_entryPtr;				///< <c>0x08</c>: ptr to the scriptType cast this to the IdGroup || StateScript etc..
 };
 
