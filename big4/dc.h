@@ -110,7 +110,7 @@ struct SsOnBlock //size 0x40
 	StringId				m_blockId;				///< <c>0x04</c>:  UNSURE. Can be null. if its null there's no script lambda ptr
 	void*					m_pScriptLambda;		///< <c>0x08</c>:  ptr to the script Lambda
 	uint16_t				m_unk;					///< <c>0x10</c>:  unk number
-	uint16_t				m_unk2;					///< <c>0x12</c>:  unk number
+	int16_t					m_numTracks;			///< <c>0x12</c>:  num tracks
 	uint32_t				m_unk3;					///< <c>0x14</c>:  always 0?
 	SsTrack*				m_pTrack;				///< <c>0x18</c>:  ptr to a track
 	const char*				m_name;					///< <c>0x20</c>:  eg: ss-asoria-player-test initial (on (start))
