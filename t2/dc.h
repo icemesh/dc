@@ -3,141 +3,133 @@
   Author  - icemesh
 */
 /******************************************************************************/
-
-//t2 .dc format
-namespace DC
-{
-	union Variant 
-	{
-		I8		m_I8;
-		U8		m_U8;
-		I16		m_I16;
-		U16		m_U16;
-		U16		m_F16;
-		I32		m_I32;
-		U32		m_U32;
-		float	m_F32;
-		double	m_F64;
-		I64		m_I64;
-		U64		m_U64;
-	};
-}
+#pragma once
+#include <stdint.h>
 
 struct Entry;
-struct ScriptInfo;
-struct SsOptions;
+struct IdGroup;
 struct SsDeclarationList;
-struct SsVariable;
+struct SsDeclaration;
+struct StateScript;
+struct SsOptions;
+struct SymbolArray;
 struct SsState;
-struct SsTrack;
-struct SsTrackLambda;
-struct Sslambda;
+struct SsTrackGroup;
 struct SsOnBlock;
+struct SsTrack;
+struct SsLambda;
+struct ScriptLambda;
+
+typedef uint64_t StringId64;
 
 struct DC_Header
 {
-	U32						m_magic;				///< <c>0x00</c>: magic 0x44433030 -> DC00
-	U32						m_versionNumber;		///< <c>0x04</c>: always 0x1
-	U32						m_textSize;				///< <c>0x08</c>: size from 0x0C to (0xC+m_TextSize)
-	U32						unk;					///< <c>0x0C</c>: always 0 
-	U32						unk1;					///< <c>0x10</c>: always 1
-	U32						m_numEntries;			///< <c>0x14</c>: num of entries
-	Entry*					m_pStartOfData;			///< <c>0x18</c>: ptr to the start of data/state script //Entry*
+	uint32_t				m_magic;				///< <c>0x00</c>: magic 0x44433030 -> DC00
+	uint32_t				m_versionNumber;		///< <c>0x04</c>: always 0x1
+	uint32_t				m_textSize;				///< <c>0x08</c>: size from 0x0C to (0xC+m_TextSize)
+	uint32_t				unk;					///< <c>0x0C</c>: always 0 
+	uint32_t				unk1;					///< <c>0x10</c>: always 1
+	int32_t					m_numEntries;			///< <c>0x14</c>: num of entries
+	Entry*					m_pStartOfData;			///< <c>0x18</c>: ptr to the start of data/state script(s) 
 };
 
-struct Entry //0x18
+struct Entry
 {
-	StringId64				m_scriptSid;			///< <c>0x00</c>: StringId64 of the script name: eg SID("ss-asoria-test-interactions") -> #750F7687D65AD24E
-	StringId64				m_scriptTypeSid;		///< <c>0x08</c>: StringId64 of the script type: eg SID("state-script") -> #CE1173292ADCBD6E
-	ScriptInfo*				m_pScriptInfo;			///< <c>0x10</c>: ptr to ScriptInfo;
+	StringId64				m_scriptId;				///< <c>0x00</c>: StringId64 of the script name
+	StringId64				m_typeId;				///< <c>0x08</c>: StringId64 of the script type eg SID("state-script")
+	void*					m_entryPtr;				///< <c>0x10</c>: ptr to the scriptType cast this to the IdGroup || StateScript etc..
 };
 
-struct ScriptInfo
+struct StateScript //0x50
 {
-	StringId64				m_scriptSid;			///< <c>0x00</c>: StringId64 of the script name: eg SID("ss-asoria-test-interactions") -> #750F7687D65AD24E
-	SsDeclarationList*		m_pDeclList;			///< <c>0x08</c>: ptr to the declaration list
-	StringId64				m_initialStateSid;		///< <c>0x10</c>: StringId64 of the initial state ?
-	SsOptions*				m_pSsOptions;			///< <c>0x18</c>: ptr to the SsOption table; 
-	U64						m_padding;				///< <c>0x20</c>: always 0
+	StringId64				m_stateScriptId;		///< <c>0x00</c>: StringId64 of the script name
+	SsDeclarationList*		m_pSsDeclList;			///< <c>0x08</c>: ptr to the declaration list
+	StringId64				m_initialStateId;		///< <c>0x10</c>: StringId64 of the initial state
+	SsOptions*				m_pSsOptions;			///< <c>0x18</c>: ptr to the SsOptions
+	uint64_t				m_unk;					///< <c>0x20</c>: always 0 ?
 	SsState*				m_pSsStateTable;		///< <c>0x28</c>: ptr to the SsState Table
+	int16_t					m_numStates;			///< <c>0x30</c>: number of states
 	//start of debug info
-	I16						m_numDeclarations;		///< <c>0x30</c>: number of declarations/variables stored/declared in the script
-	I16						m_line;					///< <c>0x32</c>: this is a line number thats get displayed in the debug display
-	U32						m_padding1;				///< <c>0x34</c>: padding probably
-	char*					m_pFileName;			///< <c>0x38</c>: the debug filename eg: t2/src/game/scriptx/ss-test/ss-test-asoria/ss-asoria-test-interactions.dcx
-	U8						m_padding2[0x10];		///< <c>0x40</c>: always 0x0
+	int16_t					m_line;					///< <c>0x32</c>: this is a line number thats get displayed in the debug display
+	uint32_t				m_unk2;					///< <c>0x34</c>: padding probably
+	const char*				m_pDebugFileName;		///< <c>0x38</c>: the debug filename eg: t2/src/game/scriptx/ss-test/ss-test-asoria/ss-asoria-test-interactions.dcx
+	const char*				m_pErrorName;			///< <c>0x40</c>: used to store any error if any
+	uint64_t				m_padding;				///< <c>0x48</c>: padding probably
 };
 
-struct SsDeclarationList //size: 0x10
+struct SsDeclarationList //0x10
 {
-	U32						m_unk;					///< <c>0x00</c>: 
-	U32						m_numDeclarations;		///< <c>0x04</c>: numDeclarations maybe ? verify..
-	SsVariable*				m_pVariableTable;		///< <c>0x08</c>: 
+	int32_t					m_unkNumber;			///< <c>0x00</c>: unk number
+	int32_t					m_numDeclarations;		///< <c>0x04</c>: number of declared vars in the table
+	SsDeclaration*			m_pDeclarations;		///< <c>0x08</c>: ptr to the list of declarations
 };
 
-struct SsVariable //size: 0x30      
+struct SsDeclaration //0x30
 {
-	StringId64				m_nameSid;				///< <c>0x00</c>: StringId of the variable name
-	U64						m_padding;				///< <c>0x08</c>: always 0 ?
-	StringId64				m_typeSid;				///< <c>0x10</c>: StringId of the variable type eg: SID("boolean"), SID("int32") ...
-	U64						m_unk;					///< <c>0x18</c>: no idea; 
-	DC::Variant*			m_pValue;				///< <c>0x20</c>: ptr to the value of the var ->
-	U64						m_unk2;					///< <c>0x28</c>: no idea; 
+	StringId64				m_declId;				///< <c>0x00</c>: StringId of the declaration name
+	uint64_t				m_padding;				///< <c>0x08</c>: padding probably
+	StringId64				m_declTypeId;			///< <c>0x10</c>: StringId of the declaration type eg: boolean, int32, float etc..
+	int16_t					m_unk;					///< <c>0x18</c>: unk number
+	int16_t					m_isVar;				///< <c>0x1A</c>: is variable ?
+	uint32_t				unk3;					///< <c>0x1C</c>: always 0 ?
+	void*					m_pDeclValue;			///< <c>0x20</c>: ptr to the declaration value
+	uint64_t				m_unkNumber;			///< <c>0x28</c>: always 0x80 ?
 };
 
-/*TODO*/
-struct SsOptions //size 0x58 <- binsize realstruct probably is 0x50 !!!UNSURE!!!!!!
+struct SsOptions //0x50
 {
-	U64						m_ssOptionsSid;		/// this is only visible to the compiler table starts @ 0x8
-	//paddinData
-	StringId64*				m_pSymbolArray; 					//0x18
+	uint8_t					m_imLazy[0x18];			///< <c>0x00</c>: self explanatory
+	SymbolArray*			m_pSymbolArray;			///< <c>0x18</c>: ptr to the symbol array
+	uint8_t					m_imLazyPt2[0x18];		///< <c>0x20</c>: self explanatory always 0 ?
+	int64_t					m_unkNumber;			///< <c>0x38</c>: unk number
+	uint8_t					m_imLazyPt3[0x10];		///< <c>0x20</c>: self explanatory always 0 ?
 };
 
-struct SsState //size 0x18
+struct SymbolArray //0x10
 {
-	StringId64				m_stateNameSid;			///< <c>0x00</c>: sid of the state name
-	I32 					m_numTracks;			///< <c>0x08</c>: numTracks
-	U32 					m_unk2;					///< <c>0x0C</c>: 
-	SsOnBlock*				m_pSsOnBlock;			///< <c>0x10</c>: point to the SsOnBlock
+	int32_t					m_numEntries;			///< <c>0x00</c>: number of entries 
+	uint32_t				m_unk;					///< <c>0x04</c>: always 0 ?
+	StringId64*				m_pSymbols;				///< <c>0x08</c>: ptr to the symbols
 };
 
-struct SsOnBlock //size 0x48 || compiler size 0x50-> SID("array") 0x8 -> SsTrack, SsTrack1, etc..
+struct SsState //0x18
 {
-	U32 					m_unkNumber;			///< <c>0x00</c>: 
-	U64 					m_unk1;					///< <c>0x04</c>: 
-	U64 					m_unk2;					///< <c>0x0C</c>:
-	U16 					m_unkNumber2;			///< <c>0x18</c>:
-	U16 					m_unkNumber3;			///< <c>0x1A</c>: numTracks in this block maybe
-	U32 					m_unk3;					///< <c>0x1C</c>:
-	SsTrack*				m_pSsTrack;				///< <c>0x20</c>: points to the track or array of tracks
-	char*					m_debugBlockInfo;		///< <c>0x28</c>: debug info eg: ss-asoria-test-interactions already-complete (on ((start)))
-	U8						m_padding[0x18];		///< <c>0x30</c>: either padding or reserved for future uses
+	StringId64				m_stateId;				///< <c>0x00</c>: StringId64 of the state name
+	int64_t					m_numSsOnBlocks;		///< <c>0x08</c>: numSsOnBlocks
+	SsOnBlock*				m_pSsOnBlocks;			///< <c>0x10</c>: ptr to the SsOnBlocks table
 };
 
-struct SsTrack //size 0x18
+struct SsOnBlock
 {
-	StringId64 				m_trackNameSid;			///< <c>0x00</c>: StringId64 of the track name
-	U16 					m_unk;					///< <c>0x08</c>: always 0x0;
-	I16 					m_numScriptLambdas;		///< <c>0x0A</c>: num of lambdas in the track
-	U32 					m_padding;				///< <c>0x0C</c>: 
-	SsTrackLambda*			m_pTrackLambda;			///< <c>0x1C</c>: 
+	int64_t					m_blockType;			///< <c>0x00</c>: //on start || on update || on event etc
+	StringId64				m_blockEventId;			///< <c>0x08</c>: UNSURE. Can be null. if its null there's no script lambda ptr
+	void*					m_pScriptLambda;		///< <c>0x10</c>: ptr to the script Lambda
+	uint16_t				m_unkNumber;			///< <c>0x18</c>: unk number
+	uint16_t				m_unkNumber2;			///< <c>0x1A</c>: unk number
+	uint32_t				m_padding;				///< <c>0x1C</c>: padding probably
+	SsTrack*				m_pTrack;				///< <c>0x20</c>: ptr to a track
+	const char*				m_name;					///< <c>0x28</c>: eg: ss-asoria-player-test initial (on (start))
+	uint8_t					m_imLazy[0x18];			///< <c>0x30</c>: always 0 ?
 };
 
-struct SsTrackLambda
+struct SsTrack //0x18
 {
-	Sslambda*				m_pLambda;				///< <c>0x00</c>: ptr to the ScriptLambda
-	U64		 				m_unk;					///< <c>0x08</c>: unk value maybe size ?
+	StringId64				m_trackId;				///< <c>0x00</c>: StringId64 of the track name
+	uint16_t				m_unk;					///< <c>0x08</c>: always 0?
+	int16_t					m_totalLambdaCount;		///< <c>0x0A</c>: unsure
+	uint32_t				m_padding;				///< <c>0x0C</c>: padding probably
+	SsLambda*				m_pSsLambda;			///< <c>0x10</c>: ptr to the SsLambda table
 };
 
-struct Sslambda	//size 0x50 || 0x40
+struct SsLambda //0x10
 {
-	U8*						m_pOpcode;				///< <c>0x00</c>: ptr to the block to execute
-	DC::Variant*			m_pSymbols;				///< <c>0x08</c>: ptr to the array of symbols. Floats, integers stringIds etc..
-	StringId64				m_funcTypeSid; 			///< <c>0x10</c>: StringId of the function type usually SID("function")
-	U64						m_unk;					///< <c>0x18</c>: unk number;
-	U64						m_unk2;					///< <c>0x20</c>: always 0x0 ?
-	U64						m_unk3;					///< <c>0x28</c>: always 0x0 ?
-	U32						m_unk4;					///< <c>0x30</c>: always 0x0 ?
-	U32						m_unk5;					///< <c>0x34</c>: always 0x0 ?
-	U64						m_unk6;					///< <c>0x38</c>: always -1
+	ScriptLambda*			m_pScriptLambda;		///< <c>0x00</c>: ptr to the script lambda of the track
+	uint64_t				m_unkNumber;			///< <c>0x08</c>: UNSURE: size maybe ?
+};
+
+struct ScriptLambda //0x10
+{
+	uint8_t*				m_pOpcode;				///< <c>0x00</c>: ptr to the first opcode of the script
+	uint64_t*				m_pSymbols;				///< <c>0x08</c>: ptr to the symbol table
+	//StringId64				m_typeId;				///< <c>0x10</c>: unsure if this should be here or not...
 };
