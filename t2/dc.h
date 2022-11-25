@@ -101,7 +101,8 @@ struct SsState //0x18
 
 struct SsOnBlock
 {
-	int64_t					m_blockType;			///< <c>0x00</c>: //on start || on update || on event etc
+	int32_t					m_blockType;			///< <c>0x00</c>: //on start || on update || on event etc
+	uint32_t				m_unkNumber;			///< <c>0x04</c>: unk number
 	StringId64				m_blockEventId;			///< <c>0x08</c>: UNSURE. Can be null. if its null there's no script lambda ptr
 	void*					m_pScriptLambda;		///< <c>0x10</c>: ptr to the script Lambda
 	uint16_t				m_unkNumber;			///< <c>0x18</c>: unk number
