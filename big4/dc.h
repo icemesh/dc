@@ -129,11 +129,11 @@ struct SsLambda //0x14
 {
 	ScriptLambda*			m_pScriptLambda;		///< <c>0x00</c>:  ptr to the script lambda of the track
 	uint64_t				m_unkNumber;			///< <c>0x08</c>:  unk number maybe size ?
-	uint32_t				m_padding;				///< <c>0x10</c>:  padding ? unsure if this should be included
 };
 
 struct ScriptLambda
 {
 	uint8_t*				m_pOpcode;				///< <c>0x00</c>:  ptr to the first opcode of the script
 	uint32_t*				m_pSymbols;				///< <c>0x08</c>:  ptr to the symbol table
+	StringId                m_typeId;				///< <c>0x10</c>:  usually SID("function")
 };

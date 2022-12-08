@@ -132,5 +132,5 @@ struct ScriptLambda //0x10
 {
 	uint8_t*				m_pOpcode;				///< <c>0x00</c>: ptr to the first opcode of the script
 	uint64_t*				m_pSymbols;				///< <c>0x08</c>: ptr to the symbol table
-	//StringId64				m_typeId;				///< <c>0x10</c>: unsure if this should be here or not...
+	StringId64				m_typeId;				///< <c>0x10</c>: usually SID("function")
 };
