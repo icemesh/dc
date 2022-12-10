@@ -128,9 +128,13 @@ struct SsLambda //0x10
 	uint64_t				m_unkNumber;			///< <c>0x08</c>: UNSURE: size maybe ?
 };
 
-struct ScriptLambda //0x10
+struct ScriptLambda //0x40
 {
 	uint8_t*				m_pOpcode;				///< <c>0x00</c>: ptr to the first opcode of the script
 	uint64_t*				m_pSymbols;				///< <c>0x08</c>: ptr to the symbol table
 	StringId64				m_typeId;				///< <c>0x10</c>: usually SID("function")
+	uint64_t				m_unkNumber;			///< <c>0x18</c>: no idea what this is used for
+	uint8_t					m_imLazy[0x14];			///< <c>0x20</c>: always 0 ?
+	uint32_t				m_unkNumber2;			///< <c>0x34</c>: no idea what this is used for
+	uint64_t				m_unkNumber3;			///< <c>0x38</c>: always -1 ? 
 };
